@@ -351,8 +351,16 @@
 
                 return await recurse();
             } else {
-                if (total - offset > 0) log.warn('Ended because API returned an empty page.');
-                return end();
+                if (data.total_results != 0 && offset === data.total_results) {
+                    log.warn('No deletable messages found.');
+                    return end();
+                } else if (data.total_results === 0) {
+                    return end();
+                }
+                
+                offset += skippedMessages.length;
+                await wait(searchDelay);
+                return await recurse();
             }
         }
 
